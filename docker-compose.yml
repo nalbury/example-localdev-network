@@ -1,0 +1,33 @@
+version: '3.8'
+networks:
+  localdev:
+    name: localdev
+
+services:
+  traefik:
+    networks:
+      - localdev
+    image: "traefik:v2.10"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  coredns:
+    networks:
+      - localdev
+    image: coredns/coredns:latest
+    command:
+      - -conf
+      - /etc/coredns/Corefile
+    ports:
+      - 53:53/udp
+    volumes:
+      - "./coredns/:/etc/coredns/:ro"
